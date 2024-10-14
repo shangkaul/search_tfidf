@@ -228,10 +228,9 @@ if __name__ == "__main__":
 
 
     phrase_search_res=phrase_search(["income taxes"],json_index)
-    # print(phrase_search_res)
+    print(phrase_search_res)
     proximity_search_res=proximity_search(["#10(income,taxes)"],json_index)
     print(proximity_search_res)
-    # print(proximity_search_res)
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(search_res)
     
