@@ -11,7 +11,7 @@ from indexing import *
 # Configure logging to display messages in the console (stdout)
 logging.basicConfig(
     level=logging.INFO,  # Set the logging level (e.g., INFO, DEBUG, WARNING)
-    format="{} : %(asctime)s - %(levelname)s : %(message)s".format("Indexing Module") # Log message format
+    format="{} : %(asctime)s - %(levelname)s : %(message)s".format("Search Module") # Log message format
 )
 
 # Create a logger instance
@@ -150,7 +150,7 @@ def proximity_search(query_list,index):
 
         query=query.split('(')
         pos_diff=int(query[0].replace('#',''))
-        query_terms=query[1].replace(")",'').split(',')
+        query_terms=query[1].lower().replace(")",'').split(',')
 
         # query=text_cleaner(query)
         # query_terms=text_tokenizer(query)
@@ -228,9 +228,9 @@ if __name__ == "__main__":
 
 
     phrase_search_res=phrase_search(["income taxes"],json_index)
-    # print(phrase_search_res)
+    print(phrase_search_res)
     proximity_search_res=proximity_search(["#10(income,taxes)"],json_index)
-    # print(proximity_search_res)
+    print(proximity_search_res)
     # pp = pprint.PrettyPrinter(indent=4)
     # pp.pprint(search_res)
     
