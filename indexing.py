@@ -56,7 +56,7 @@ def stopword_remover(text,stop_word_path):
     file.close()
     return [word for word in text if word not in stop_word_set]
 
-def text_stemmer(text,lang='english'):
+def text_stemmer(text,lang='porter'):
     ps = Stemmer.Stemmer(lang)
     return [ps.stemWord(word) for word in text]
 
@@ -76,7 +76,7 @@ def preprocessor(input_file_path):
         #Cleanup and case folding
         #remove punctuation and replace with ' '
         
-        doc['headline']=text_cleaner(doc['text'])
+        doc['headline']=text_cleaner(doc['headline'])
         doc['text']=text_cleaner(doc['text'])
    
         #tokenize()
@@ -149,18 +149,19 @@ def create_inverted_index(doc_list):
             pos=pos+1
 
 
-    with open("data/index.txt",'w') as file:
+    with open("data/test_set/result/index.txt",'w') as file:
         for k in sorted(index.keys()):
-            file.write(str(k)+":  "+str(index[k][0]))
+            file.write(str(k)+":"+str(index[k][0]))
             file.write("\n")
 
             for doc in index[k][1].keys():
-                file.write("                "+doc+": ")
+                file.write("        "+doc+": ")
                 # logging.info(",".join(index[k][1][doc]))
                 # logging.info(" ")
                 file.write(','.join(str(pos) for pos in index[k][1][doc]))
                 # file.write(str(posList))
                 file.write("\n")
+            file.write("\n")
         logging.info("Index file written to txt")
         
         json_index = {"__all_docs__": list(all_docs)}
@@ -188,6 +189,7 @@ def create_inverted_index(doc_list):
 
 if __name__ == "__main__":
 
+    processed_text=preprocessor("data/trec.5000.xml")
     # processed_text=preprocessor("data/trec.sample.xml")
-    # index_dict=create_inverted_index(processed_text)
-    pass
+    index_dict=create_inverted_index(processed_text)
+    # pass
