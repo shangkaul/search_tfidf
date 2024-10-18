@@ -53,7 +53,8 @@ def ranked_retrieval(query_list,index):
         #concatenate AND between all query terms and do boolean search
         query_terms_bool=" or ".join(query_terms)
 
-        # print(query_terms_bool)
+
+        print(query_terms_bool)
         
         bool_search_res=boolean_search([query_terms_bool],index)
         # print(bool_search_res[query_terms_bool]["documents"])

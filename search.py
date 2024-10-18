@@ -304,8 +304,8 @@ if __name__ == "__main__":
     # print("matches: {}".format(len(proximity_search_res)))
     # print(proximity_search_res)
 
-    # phrase_search_res=boolean_search(['"wall street" AND "dow jones"'],json_index)
-    # print(phrase_search_res)  
+    phrase_search_res=boolean_search(['ft or articl or deal or bbc or bskyb'],json_index)
+    print(phrase_search_res)  
     
 
     
