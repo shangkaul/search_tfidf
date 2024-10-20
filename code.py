@@ -15,16 +15,16 @@ logging.basicConfig(
 )
 
 # Create a logger instance
-logger = logging.getLogger()
+logger=logging.getLogger()
 
 
 
 def read_xml(file_path):
     '''
-    Reads and parses an XML file.
+    Reads and parses an XML file
     '''
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+    tree=ET.parse(file_path)
+    root=tree.getroot()
     doc_list=[]
     for doc in root:
         doc_list.append({
@@ -38,34 +38,28 @@ def read_xml(file_path):
     
 def print_xml(xml):
     """
-    Prints each document in the provided XML list using pretty printing.
+    Prints each document in the provided XML list using pretty printing
 
     Args:
-        xml (list): A list of XML documents to be printed.
+        xml (list): list of XML documents to be printed
 
     Returns:
         None
     """
-    pp = pprint.PrettyPrinter(indent=4)
+    pp=pprint.PrettyPrinter(indent=4)
     for doc in xml:
         pp.plogging.info(doc)
 
 
 def text_cleaner(text):
     """
-    Cleans the input text by performing the following operations:
-    1. Removes all characters except alphanumeric characters, spaces, and hyphens.
-    2. Converts the text to lowercase.
-    3. Replaces newline characters with spaces.
-    4. Replaces double spaces with single spaces.
-    5. Replaces hyphens with spaces.
-    6. Removes any extra spaces.
+    Cleans the input text by removing all special characters, performing case folding and replacing - with space. Also removes extra spaces
 
     Args:
-        text (str): The input text to be cleaned.
+        text (str): The input text to be cleaned
 
     Returns:
-        str: The cleaned text.
+        str: The cleaned text
     """
     # cleaned_text=re.sub(r"[^a-zA-Z0-9\s-]", '',text).lower().replace("\n",' ').replace("  "," ")
     cleaned_text=re.sub(r"[^a-zA-Z0-9\s-]", '',text).lower().replace("\n",' ').replace("  "," ").replace('-',' ')
@@ -74,26 +68,26 @@ def text_cleaner(text):
 
 def text_tokenizer(text):
     """
-    Tokenizes the input text by splitting it into words.
+    Tokenizes the input text by splitting it into list of words
 
     Args:
-        text (str): The input string to be tokenized.
+        text (str): The input string to be tokenized
 
     Returns:
-        list: A list of words obtained by splitting the input text.
+        list: list of words obtained by splitting the input text
     """
     return text.split()
 
 def stopword_remover(text,stop_word_path):
     """
-        Removes stopwords from the given text.
+        Removes stopwords from the given text
 
         Args:
-            text (list of str): The input text represented as a list of words.
-            stop_word_path (str): The file path to the stopwords file. The file should contain stopwords separated by whitespace.
+            text (list of str): The input text represented as a list of words
+            stop_word_path (str): stopwords file path
 
         Returns:
-            list of str: The text with stopwords removed.
+            list of str: The text with stopwords removed
     """
     file=open(stop_word_path,'r')
     stop_word_set=set(file.read().split())
@@ -102,27 +96,27 @@ def stopword_remover(text,stop_word_path):
 
 def text_stemmer(text,lang='porter'):
     """
-        Stems the words in the given text using the specified stemming algorithm.
+        Stems the words in the given text using the specified stemming algorithm
 
         Args:
-            text (list of str): A list of words to be stemmed.
-            lang (str, optional): The stemming algorithm to use. Defaults to 'porter'.
+            text (list of str) list of words to be stemmed
+            lang (str, optional): The stemming algorithm to use (porter default)
 
         Returns:
-            list of str: A list of stemmed words.
+            list of str list of stemmed text
     """
-    ps = Stemmer.Stemmer(lang)
+    ps=Stemmer.Stemmer(lang)
     return [ps.stemWord(word) for word in text]
 
 def preprocessor(input_file_path):
     """
     Preprocesses text data from an XML file.
     This function reads an XML file, cleans and tokenizes the text data, removes stop words, 
-    and applies stemming to the text.
+    and applies stemming to the text
     Args:
-        input_file_path (str): The file path to the input XML file.
+        input_file_path (str): The file path to the input XML file
     Returns:
-        list: A list of dictionaries, where each dictionary represents a document with preprocessed text.
+        list list of dictionaries, where each dictionary represents a document with preprocessed text
     """
     logging.info("Starting text pre-processing")
     start_time=datetime.datetime.now()
@@ -130,7 +124,7 @@ def preprocessor(input_file_path):
 
     doc_list=read_xml(input_file_path)
 
-    pp = pprint.PrettyPrinter(indent=4)
+    pp=pprint.PrettyPrinter(indent=4)
     stop_words_path="data/english_stop_list.txt"
 
 
@@ -161,16 +155,16 @@ def preprocessor(input_file_path):
 
 def create_inverted_index(doc_list):
     """
-    Creates an inverted index from a list of documents.
+    Creates an inverted index from a list of documents
     The inverted index is a dictionary where each key is a term, and the value is a tuple containing the document frequency 
-    and a dictionary of document IDs with their respective positions of the term.
+    and a dictionary of document IDs with their respective positions of the term
     Args:
-        doc_list (list): A list of documents, where each document is a dictionary with 'id', 'headline', and 'text' keys.
+        doc_list (list) list of documents
     Returns:
-        dict: The inverted index.
+        dict: The inverted index
     Example:
         Input:
-            doc_list = [
+            doc_list=[
                 {'id': 1, 'headline': ['Lorem', 'ipsum'], 'text': ['dolor', 'sit', 'amet']},
                 {'id': 2, 'headline': ['ipsum', 'Lorem'], 'text': ['amet', 'sit', 'dolor']}
             ]
@@ -181,7 +175,7 @@ def create_inverted_index(doc_list):
                 "sit": [2, {1: [4], 2: [5]}],
                 "amet": [2, {1: [5], 2: [4]}]
             ]
-    The function also writes the index to a text file and a JSON file.
+    The function also writes the index to a text file and a JSON file
     """
     #Creating an index:
     logging.info("Starting Index creation")
@@ -217,9 +211,9 @@ def create_inverted_index(doc_list):
     }
     '''
     index={}
-    all_docs = set()
+    all_docs=set()
     for doc in doc_list:
-        doc_id = doc['id']
+        doc_id=doc['id']
         all_docs.add(doc_id)
         pos=1
         for word in doc['headline']+doc['text']:
@@ -250,10 +244,10 @@ def create_inverted_index(doc_list):
             file.write("\n")
         logging.info("Index file written to txt")
         
-        json_index = {"__all_docs__": list(all_docs)}
+        json_index={"__all_docs__": list(all_docs)}
 
         for term, (doc_freq, postings) in sorted(index.items()):
-            json_index[term] = {
+            json_index[term]={
                 "doc_freq": doc_freq,
                 "postings_list": {
                      str(doc_id): positions for doc_id, positions in postings.items()
@@ -274,22 +268,12 @@ def boolean_search(query_list, index):
     """
     Perform a boolean search on the given index using the provided list of queries.
     Args:
-        query_list (list of str): A list of query strings to be processed.
-        index (dict): An inverted index where keys are terms and values are dictionaries containing postings lists.
+        query_list (list of str): list of query strings
+        index (dict): search index
     Returns:
-        dict: A dictionary where each key is a query and the value is another dictionary with:
-            - "matches" (int): The number of documents that match the query.
-            - "documents" (list of int): A list of document IDs that match the query.
-    The function processes each query by:
-        1. Cleaning and tokenizing the query.
-        2. Removing stop words.
-        3. Stemming the query terms.
-        4. Using stacks to evaluate the boolean expressions in the query.
-        5. Returning the matching document IDs for each query.
-    Note:
-        - The function logs the start time and the time taken to perform the search.
-        - The function supports the boolean operators "and", "or", and "not".
-        - Phrases enclosed in double quotes are treated as single terms and processed using a phrase search function.
+        dict dictionary where each key is a query and the value is another dictionary with:
+            - "matches" (int): The number of documents that match the query
+            - "documents" (list of int) list of document IDs that match the query
     """
     start_time=datetime.datetime.now()
     logging.info("Boolean Search Start time: {}".format(start_time))
@@ -304,7 +288,7 @@ def boolean_search(query_list, index):
         # query=text_cleaner(query)
         #TOkenize but keep phrases intact
         # query_terms=text_tokenizer(query)
-        query_terms = re.findall(r'\"[^\"]+\"|\S+', query)
+        query_terms=re.findall(r'\"[^\"]+\"|\S+', query)
         
         #remove stop words
         stop_words_path="data/english_stop_list.txt"
@@ -319,7 +303,7 @@ def boolean_search(query_list, index):
 
         operand_stack=[]
         operator_stack=[]
-        operator_precedence = {"or":1,"and":2,"not":3}
+        operator_precedence={"or":1,"and":2,"not":3}
 
         # print(query_terms)
         #Create operator and operand stacks
@@ -328,6 +312,7 @@ def boolean_search(query_list, index):
 
             if term in operator_precedence.keys():
                 #precedence wise operator search
+                #check if top precedence > curr op
                 while len(operator_stack)>0 and operator_precedence[operator_stack[-1]] >= operator_precedence[term]:
                     op=operator_stack.pop()
                     if op=="not":
@@ -343,14 +328,13 @@ def boolean_search(query_list, index):
                         elif op=="or":
                             operand_stack.append(left_doc_ids | right_doc_ids)
 
-                # outside loop -> precedence of current operator is more  -> push to operator stack           
                 operator_stack.append(term)
             else:
                 # Process phrase operand by using phrase search function
                 if term[0]=='"' and term[-1]=='"':
-                    phrase = term.strip('"')
-                    phrase_result = phrase_search([phrase], index)
-                    doc_ids = set(phrase_result)
+                    phrase=term.strip('"')
+                    phrase_result=phrase_search([phrase], index)
+                    doc_ids=set(phrase_result)
                 else:
                     if term in index:
                         doc_ids=set(index[term]["postings_list"].keys())
@@ -383,16 +367,11 @@ def boolean_search(query_list, index):
 def phrase_search(query_list,index):
     """
     Perform a phrase search on the given index using the provided list of queries.
-    This function processes each query by cleaning the text, tokenizing it, removing stop words,
-    and optionally stemming the terms. It then performs a boolean search to find documents that
-    contain all the query terms. For each document in the boolean search results, it checks if
-    the terms appear in the correct order to form the phrase.
     Args:
-    query_list (list of str): A list of query phrases to search for.
-    index (dict): An inverted index where keys are terms and values are dictionaries containing
-                      postings lists with document IDs and positions.
+    query_list (list of str) list of query phrases to search for.
+    index (dict) inverted index
     Returns:
-        list: A list of document IDs that contain the query phrases.
+        list list of document IDs that contain the query phrases.
     """
     start_time=datetime.datetime.now()
     logger.info("Phrase search started {}".format(start_time))
@@ -426,7 +405,7 @@ def phrase_search(query_list,index):
         doc_list=[]
 
         for doc in common_docs:
-            first_term_pos_list = index[query_terms[0]]["postings_list"][doc]
+            first_term_pos_list=index[query_terms[0]]["postings_list"][doc]
             
 
             for pos in first_term_pos_list:
@@ -446,20 +425,11 @@ def proximity_search(query_list,index):
     """
     Perform a proximity search on the given index using the provided query list.
     Args:
-        query_list (list of str): A list of proximity queries. Each query should be in the format '#N(term1,term2)' 
+        query_list (list of str) list of proximity queries. Each query should be in the format '#N(term1,term2)' 
                                   where N is the maximum allowed distance between term1 and term2.
-        index (dict): An inverted index where keys are terms and values are dictionaries containing document IDs and 
-                      their respective postings lists.
+        index (dict): search index
     Returns:
-        list of int: A sorted list of document IDs that satisfy the proximity search criteria.
-    Example:
-        query_list = ['#3(income,tax)']
-        index = {
-            'income': {'postings_list': {1: [1, 5], 2: [2, 8]}},
-            'tax': {'postings_list': {1: [3, 10], 2: [5, 12]}}
-        }
-        result = proximity_search(query_list, index)
-        # result would be [1, 2] if both documents satisfy the proximity condition
+        list of int sorted list of document IDs that satisfy the proximity search criteria.
     """
     start_time=datetime.datetime.now()
     logger.info("Proximity search started {}".format(start_time))
@@ -523,15 +493,12 @@ def ranked_retrieval(query_list,index):
     """
     Perform ranked retrieval on a list of queries using a given index.
     This function calculates the TF-IDF score for each document in the index
-    based on the terms in the query list. It returns a dictionary containing
-    the query terms, document IDs, query numbers, and their respective scores.
+    based on the terms in the query list.
     Args:
-        query_list (list of str): A list of query strings to be processed.
-        index (dict): An index containing term information, postings lists, 
-                      and document frequencies.
+        query_list (list of str) list of query strings to be processed.
+        index (dict): search index
     Returns:
-        dict: A dictionary where keys are concatenated query terms and values 
-              are lists of dictionaries with keys 'term', 'doc', 'qnum', and 'score'.
+        dict: result dict
     """
     start_time= datetime.datetime.now()
     logger.info("Starting Ranked Retrieval at {}".format(start_time))
@@ -565,7 +532,7 @@ def ranked_retrieval(query_list,index):
         query_terms_bool=" or ".join(query_terms)
 
 
-        print(query_terms_bool)
+        # print(query_terms_bool)
         
         bool_search_res=boolean_search([query_terms_bool],index)
         # print(bool_search_res[query_terms_bool]["documents"])
@@ -617,12 +584,11 @@ def ranked_retrieval(query_list,index):
 
 if __name__ == "__main__":
     # processed_text=preprocessor("data/trec.sample.xml")
-
     processed_text=preprocessor("data/trec.5000.xml")
     index_dict=create_inverted_index(processed_text)
     json_index={}
     with open("data/index.json", 'r') as json_file:
-        json_index = json.load(json_file)
+        json_index=json.load(json_file)
     logging.info("JSON index loaded")  
 
     # print(boolean_search(["Sadness"],json_index))
@@ -672,7 +638,7 @@ if __name__ == "__main__":
     
     ranked_res=ranked_retrieval(query_list,json_index)
     
-    # pp = pprint.PrettyPrinter(indent=4)
+    # pp=pprint.PrettyPrinter(indent=4)
     # pp.pprint(ranked_res)
 
 
@@ -680,7 +646,11 @@ if __name__ == "__main__":
 
     with open("data/test_set/result/results.ranked.txt",'w') as file:
         for query in ranked_res:
-            sorted_results = sorted(ranked_res[query], key=lambda x: x['score'], reverse=True)
+            count=0
+            sorted_results=sorted(ranked_res[query], key=lambda x: x['score'], reverse=True)
             for res in sorted_results:
-                file.write(f"{res['qnum']},{res['doc']},{res['score']}\n")
+                file.write(f"{res['qnum']},{res['doc']},{round(res['score'],4)}\n")
+                count+=1
+                if count>=150:
+                    break
     logger.info("Ranked retrieval results written to txt file")
