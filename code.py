@@ -96,7 +96,7 @@ def stopword_remover(text,stop_word_path):
 
 def text_stemmer(text,lang='porter'):
     """
-        Stems the words in the given text using the specified stemming algorithm
+        Stems the words in the given text using the passed stemming algorithm
 
         Args:
             text (list of str) list of words to be stemmed
