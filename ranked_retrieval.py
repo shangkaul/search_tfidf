@@ -45,7 +45,7 @@ def ranked_retrieval(query_list,index):
         stop_words_path="data/english_stop_list.txt"
         with open(stop_words_path,'r') as file:
             stop_word_set=set(file.read().split())
-        query_terms=[word for word in query_terms if word not in stop_word_set or word in ["and", "or", "not"]]
+        query_terms=[word for word in query_terms if word not in stop_word_set]
         
         #stemmer
         
@@ -53,7 +53,8 @@ def ranked_retrieval(query_list,index):
         #concatenate AND between all query terms and do boolean search
         query_terms_bool=" or ".join(query_terms)
 
-        # print(query_terms_bool)
+
+        print(query_terms_bool)
         
         bool_search_res=boolean_search([query_terms_bool],index)
         # print(bool_search_res[query_terms_bool]["documents"])
@@ -108,6 +109,7 @@ def ranked_retrieval(query_list,index):
 
 if __name__ == "__main__":
     # processed_text=preprocessor("data/trec.sample.xml")
+    # processed_text=preprocessor("data/trec.5000.xml")
     # index_dict=create_inverted_index(processed_text)
     json_index={}
     with open("data/index.json", 'r') as json_file:
@@ -116,7 +118,7 @@ if __name__ == "__main__":
 
     query_list=[]
 
-    with open("data/ranked_queries.txt",'r') as file:
+    with open("data/test_set/queries.ranked.txt",'r') as file:
         for line in file:
             line=line.replace('\n','').split()
             line=" ".join(line[1:])
@@ -131,7 +133,7 @@ if __name__ == "__main__":
 
 
 
-    with open("data/ranked_result.txt",'w') as file:
+    with open("data/test_set/result/results.ranked.txt",'w') as file:
         for query in ranked_res:
             sorted_results = sorted(ranked_res[query], key=lambda x: x['score'], reverse=True)
             for res in sorted_results:

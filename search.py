@@ -7,6 +7,7 @@ from collections import OrderedDict
 # Add the directory containing your module to the Python path (wants absolute paths)
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 from indexing import *
+import pprint
 
 # Configure logging to display messages in the console (stdout)
 logging.basicConfig(
@@ -28,14 +29,18 @@ def boolean_search(query_list, index):
         #remove punctuation and replace with ' '
         q=query
 
-        query=text_cleaner(query)
-        query_terms=text_tokenizer(query)
+        # query=text_cleaner(query)
+        #TOkenize but keep phrases intact
+        # query_terms=text_tokenizer(query)
+        query_terms = re.findall(r'\"[^\"]+\"|\S+', query)
         
         #remove stop words
         stop_words_path="data/english_stop_list.txt"
         with open(stop_words_path,'r') as file:
             stop_word_set=set(file.read().split())
+
         query_terms=[word for word in query_terms if word not in stop_word_set or word in ["and", "or", "not"]]
+
         
         #stemmer
         query_terms=text_stemmer(query_terms)
@@ -43,9 +48,12 @@ def boolean_search(query_list, index):
         operand_stack=[]
         operator_stack=[]
         operator_precedence = {"or":1,"and":2,"not":3}
-        
+
+        # print(query_terms)
         #Create operator and operand stacks
         for term in query_terms:
+            term=term.lower()
+
             if term in operator_precedence.keys():
                 #precedence wise operator search
                 while len(operator_stack)>0 and operator_precedence[operator_stack[-1]] >= operator_precedence[term]:
@@ -66,13 +74,18 @@ def boolean_search(query_list, index):
                 # outside loop -> precedence of current operator is more  -> push to operator stack           
                 operator_stack.append(term)
             else:
-                # read operand and push operand's doc list to stack
-                if term in index:
-                    doc_ids=set(index[term]["postings_list"].keys())
+                # Process phrase operand by using phrase search function
+                if term[0]=='"' and term[-1]=='"':
+                    phrase = term.strip('"')
+                    phrase_result = phrase_search([phrase], index)
+                    doc_ids = set(phrase_result)
                 else:
-                    doc_ids=set()
-                #Push operand to stack
+                    if term in index:
+                        doc_ids=set(index[term]["postings_list"].keys())
+                    else:
+                        doc_ids=set()
                 operand_stack.append(doc_ids)
+                # print("doc ids pushed in stack for"+term)
         
 
         while operator_stack:
@@ -112,22 +125,24 @@ def phrase_search(query_list,index):
         
         #stemmer
         
-        query_terms=text_stemmer(query_terms)
+        # query_terms=text_stemmer(query_terms)
         #concatenate AND between all query terms and do boolean search
         query_terms_bool=" and ".join(query_terms)
 
-        print(query_terms_bool)
+        # print(query_terms_bool)
         
         bool_search_res=boolean_search([query_terms_bool],index)
         # print(bool_search_res[query_terms_bool]["documents"])
 
         #for all docs in bool search result,see pos diff for each term if more than 1; break;
         common_docs=bool_search_res[query_terms_bool]["documents"]
+        query_terms=text_stemmer(query_terms)
         # print(common_docs)
         doc_list=[]
 
         for doc in common_docs:
-            first_term_pos_list=index[query_terms[0]]["postings_list"][doc]
+            first_term_pos_list = index[query_terms[0]]["postings_list"][doc]
+            
 
             for pos in first_term_pos_list:
                 phrase_match=1
@@ -156,26 +171,29 @@ def proximity_search(query_list,index):
         # query_terms=text_tokenizer(query)
         
         #remove stop words
-        stop_words_path="data/english_stop_list.txt"
-        with open(stop_words_path,'r') as file:
-            stop_word_set=set(file.read().split())
-        query_terms=[word for word in query_terms if word not in stop_word_set or word in ["and", "or", "not"]]
+        # stop_words_path="data/english_stop_list.txt"
+        # with open(stop_words_path,'r') as file:
+            # stop_word_set=set(file.read().split())
+        # query_terms=[word for word in query_terms if word not in stop_word_set or word in ["and", "or", "not"]]
         
         #stemmer
         
-        query_terms=text_stemmer(query_terms)
 
-        print(query_terms)
         #concatenate AND between all query terms and do boolean search
         query_terms_bool=" and ".join(query_terms)
 
-        print(query_terms_bool)
+        # print(query_terms_bool)
+
         
         bool_search_res=boolean_search([query_terms_bool],index)
         # print(bool_search_res[query_terms_bool]["documents"])
 
         #for all docs in bool search result,see pos diff for each term if more than 1; break;
         common_docs=bool_search_res[query_terms_bool]["documents"]
+        query_terms=text_stemmer(query_terms)
+
+        query_terms=[word.strip() for word in query_terms]
+
         # print(common_docs)
         doc_list=[]
 
@@ -200,24 +218,53 @@ def proximity_search(query_list,index):
 
 if __name__ == "__main__":
     # processed_text=preprocessor("data/trec.sample.xml")
+
+    # processed_text=preprocessor("data/trec.5000.xml")
     # index_dict=create_inverted_index(processed_text)
     json_index={}
     with open("data/index.json", 'r') as json_file:
         json_index = json.load(json_file)
     logging.info("JSON index loaded")  
 
+    # print(boolean_search(["Sadness"],json_index))
+
     # logging.info(type(json_index))  
     
-    ## Search
+    # Search
     queries=[]
-    with open("data/queries.txt",'r') as file:
+    with open("data/test_set/queries.boolean.txt",'r') as file:
         for line in file:
             queries.append(line.strip())
-    
-    
+
+    res={}
+    q_num=1
+    for query in queries:
+        q=" ".join(query.split()[1:])
+        res[q_num]={"q_num":q_num,
+                    "query": q,
+                    "matches":0,
+                    "result":[]}
+        
+        if '#' in q:
+            res[q_num]["result"]=proximity_search([q],json_index)
+        else:
+            res[q_num]["result"]=boolean_search([q],json_index)[q]["documents"]
+        res[q_num]["matches"]=len(res[q_num]["result"])
+        q_num+=1
 
 
-    # bool_search_res=boolean_search(queries,json_index)
+    # pprint.pprint(res)
+
+    with open("data/test_set/result/results.boolean.txt",'w') as file:
+        for q in res.keys():
+            for doc in res[q]["result"]:
+                file.write("{},{}\n".format(q,doc))
+                
+    logger.info("Result file written")
+    
+
+    # bool_search_res=boolean_search(queries[:1],json_index)
+    # print(bool_search_res)
     # with open("data/bolean_search.txt",'w') as file:
     #    q_num=1
     #    for query in bool_search_res.keys():
@@ -225,14 +272,42 @@ if __name__ == "__main__":
     #            file.write(str(q_num)+","+str(doc_num)+"\n")
     #        q_num=q_num+1
     # logger.info("Bool search results saved to txt")
+    
+    # phrase_search_res=boolean_search(['israel and "middle east"'],json_index)
+    # print(phrase_search_res)    
+    # phrase_search_res=boolean_search(['"middle east" AND israel'],json_index)
+    # print(phrase_search_res)
 
+    # phrase_search_res=boolean_search(['"wall street" AND "dow jones"'],json_index)
+    # print(phrase_search_res)    
+    # phrase_search_res=boolean_search(['"dow jones" and "wall street"'],json_index)
+    # print(phrase_search_res)
 
-    phrase_search_res=phrase_search(["income taxes"],json_index)
-    print(phrase_search_res)
-    proximity_search_res=proximity_search(["#10(income,taxes)"],json_index)
-    print(proximity_search_res)
-    # pp = pprint.PrettyPrinter(indent=4)
-    # pp.pprint(search_res)
+    # phrase_search_res=boolean_search(['Sadness'],json_index)
+    # print(phrase_search_res)   
+    
+    # phrase_search_res=boolean_search(['glasgow and scotland'],json_index)
+    # print(phrase_search_res) 
+    # phrase_search_res=boolean_search(['corporate and taxes'],json_index)
+    # print(phrase_search_res) 
+    # phrase_search_res=boolean_search(['"corporate taxes"'],json_index)
+    # print(phrase_search_res) 
+
+    # proximity_search_res=proximity_search(["#30(corporate,taxes)"],json_index)
+    # print("matches: {}".format(len(proximity_search_res)))
+    # print(proximity_search_res)
+
+    # phrase_search_res=boolean_search(['"middle east" AND israel'],json_index)
+    # print(phrase_search_res)    
+
+    # proximity_search_res=proximity_search(["#5(Palestinian, organisations)"],json_index)
+    # print("matches: {}".format(len(proximity_search_res)))
+    # print(proximity_search_res)
+
+    # phrase_search_res=boolean_search(['ft or articl or deal or bbc or bskyb'],json_index)
+    # print(phrase_search_res)  
+    
+
     
         
 
